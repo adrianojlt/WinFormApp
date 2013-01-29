@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace WinFormApp
 {
+    // Person class
     class Person
     {
     }
