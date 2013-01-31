@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,12 +17,58 @@ namespace WinFormApp
         {
             InitializeComponent();
             myInit();
+            populateTree();
         }
 
         public void myInit()
         {
             //this.Text = "Calculator";
             //this.Size = new Size(200, 225);
+        }
+
+        public void tmp()
+        {
+            //IDbConnection myCn = new SqlConnection();
+            //string connType = myCn.GetType().Name;
+            //Console.WriteLine(" *** " + connType + " *** ");
+        }
+        
+
+        public void populateTree()
+        {
+
+            // first node
+            TreeNode first = new TreeNode();
+            first.Name = "1";
+            first.Text = "root01";
+
+            TreeNode ch0101 = new TreeNode();
+            ch0101.Name = "2";
+            ch0101.Text = "ch0101";
+            TreeNode ch0102 = new TreeNode();
+            ch0102.Name = "3";
+            ch0102.Text = "ch0102";
+
+            ch0102.Nodes.Add(new TreeNode("."));
+            ch0102.Nodes.Add(new TreeNode(".."));
+            
+            first.Nodes.Add(ch0101);
+            first.Nodes.Add(ch0102);
+
+            // secound node
+            TreeNode secound = new TreeNode();
+            secound.Name = "2";
+            secound.Text = "root02";
+
+
+
+            tree.Nodes.Add(first);
+            tree.Nodes.Add(secound);
+        }
+
+        private void btnTmp_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
