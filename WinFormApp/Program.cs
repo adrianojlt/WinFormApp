@@ -16,7 +16,13 @@ namespace WinFormApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            //Application.Run(new MainForm());
+
+            Form menuForm = new MenuForm();
+            menuForm.StartPosition = FormStartPosition.CenterScreen;
+            menuForm.Show();
+            Application.Run(menuForm);
+
             //Application.Run(new TmpForm());
         }
     }
