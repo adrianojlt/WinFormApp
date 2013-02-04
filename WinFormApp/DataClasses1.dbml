@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="WinFormApp" Class="DataClasses1DataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=SATELLITE;Initial Catalog=WinFormApp;Persist Security Info=True;User ID=adriano" SettingsObjectName="WinFormApp.Properties.Settings" SettingsPropertyName="WinFormAppConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.MenuType" Member="MenuTypes">
+    <Type Name="MenuType">
+      <Column Name="id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="menuType" Member="menuType1" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="menuTypeName" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Menus" Member="Menus">
+    <Type Name="Menus">
+      <Column Name="idMenu" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="idParentMenu" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="MenuType" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="MenuName" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="MenuOrder" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Column Name="Url" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
+      <Column Name="icon" Type="System.String" DbType="VarChar(200)" CanBeNull="true" />
+      <Column Name="NewWindow" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Column Name="LeftExtent" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="RightExtent" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Status" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="MenuFunction" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
+      <Column Name="PageName" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="MenuTransact" Type="System.String" DbType="VarChar(120)" CanBeNull="true" />
+    </Type>
+  </Table>
+</Database>
