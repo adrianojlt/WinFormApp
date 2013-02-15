@@ -17,7 +17,7 @@ namespace WinFormApp
         {
             InitializeComponent();
             myInit();
-            populateTree();
+            //populateTree();
         }
 
         public void myInit()
@@ -40,53 +40,21 @@ namespace WinFormApp
             return result.ToList();
         }
 
-        public void populateTree()
-        {
-
-            // first node
-            TreeNode first = new TreeNode();
-            first.Name = "1";
-            first.Text = "root01";
-
-            TreeNode ch0101 = new TreeNode();
-            ch0101.Name = "2";
-            ch0101.Text = "ch0101";
-            TreeNode ch0102 = new TreeNode();
-            ch0102.Name = "3";
-            ch0102.Text = "ch0102";
-
-            ch0102.Nodes.Add(new TreeNode("."));
-            ch0102.Nodes.Add(new TreeNode(".."));
-            
-            first.Nodes.Add(ch0101);
-            first.Nodes.Add(ch0102);
-
-            // secound node
-            TreeNode secound = new TreeNode();
-            secound.Name = "2";
-            secound.Text = "root02";
-
-            
-
-            tree.Nodes.Add(first);
-            tree.Nodes.Add(secound);
-        }
-
-        private void btnTmp_Click(object sender, EventArgs e)
-        {
-            List<MenuType> tmp = getMenuType();
-        }
-
-        private void btnMenu_Click(object sender, EventArgs e)
-        {
-            Form menuForm = new MenuForm();
-            menuForm.StartPosition = FormStartPosition.CenterScreen;
-            menuForm.Show();
-        }
-
         private void WinFormApp_load(object sender, EventArgs e)
         {
 
         }
+
+		private void btnMenu_Click(object sender, EventArgs e)
+		{
+			MenuForm menuForm = new MenuForm();
+			menuForm.Show();
+		}
+
+		private void btnChoose_Click(object sender, EventArgs e)
+		{
+			ChooseMenu chooseMenu = new ChooseMenu();
+			chooseMenu.Show();
+		}
     }
 }

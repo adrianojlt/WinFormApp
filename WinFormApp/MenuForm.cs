@@ -16,17 +16,17 @@ namespace WinFormApp
         public const string MENU_LEVEL1 = "CATEGORY";
         public const string MENU_LEVEL2 = "MENU";
 
-        enum SaveModeEnum
+        enum SaveMode
         {
             add,
             edit
         }
 
-        private SaveModeEnum save_mode;
+        private SaveMode activeMode;
 
         private List<Menus> menusDB;
 
-        TreeNode selectedNode;
+		public TreeNode selectedNode;
 
         public MenuForm()
         {
@@ -35,6 +35,7 @@ namespace WinFormApp
 
         private void menuForm_load(object sender, EventArgs e)
         {
+            loadTreeMenu();
         }
 
         private void loadTreeMenu()
@@ -79,7 +80,7 @@ namespace WinFormApp
                 menuTree.SelectedNode = menuTree.Nodes.Find(selectedNode.Name, true).First();
                 menuTree.Select();
             }
-            catch (NullReferenceException)
+            catch (Exception)
             { 
             }
         }
@@ -141,15 +142,12 @@ namespace WinFormApp
             inputDescription.Text = selectedMenu.Description;
 
             enableInputs(false);
-
-            if (MENU_LEVEL2.Equals(selectedMenu.MenuType)) btnAdd.Enabled = false; else btnAdd.Enabled = true;
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            save_mode = SaveModeEnum.edit;
+            activeMode = SaveMode.edit;
 
-            //TreeNode selectedNode = menuTree.SelectedNode;
             selectedNode = menuTree.SelectedNode;
             menuTree.SelectedNode = selectedNode;
             menuTree.Select();
@@ -169,17 +167,6 @@ namespace WinFormApp
             }
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
-        {
-            save_mode = SaveModeEnum.add;
-            selectedNode = menuTree.SelectedNode;
-            menuTree.SelectedNode = selectedNode;
-            menuTree.Select();
-
-            this.clearInputs();
-            this.enableInputs(true);
-        }
-
         private void btnRemove_Click(object sender, EventArgs e)
         {
             selectedNode = menuTree.SelectedNode;
@@ -189,38 +176,199 @@ namespace WinFormApp
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (inputName.Enabled == false)
-                return;
+            if (inputName.Enabled == false) return;
+
+            this.selectedNode = menuTree.SelectedNode;
 
             DataClasses1DataContext ctx = new DataClasses1DataContext();
-
-            switch (save_mode)
+            
+            switch (activeMode)
             {
-                case SaveModeEnum.edit:
-                    MessageBox.Show("edit");
+                case SaveMode.edit:
+
+                    int nodeId = Convert.ToInt32(this.selectedNode.Name);
+
+                    try
+                    { 
+                        Menus menu2edit = (from m in ctx.Menus where m.idMenu == nodeId select m).First();
+                        menu2edit.MenuName = inputName.Text;
+                        menu2edit.Description = inputDescription.Text;
+                    }
+                    catch (Exception) { }
+
                     break;
-                case SaveModeEnum.add:
-                    MessageBox.Show("add");
+                case SaveMode.add:
+
+                    Menus menu2add = new Menus();
+
+                    try
+                    {
+                        if (menuTree.SelectedNode == null)
+                        {// add root menu ...
+
+                            menu2add.idParentMenu = null;
+
+                            menu2add.MenuType = MENU_LEVEL0;
+
+                            int? lastMenu = menusDB.FindAll(i => i.idParentMenu == null).Max(i => i.MenuOrder);
+
+                            if (lastMenu == null) 
+                                menu2add.MenuOrder = 1; 
+                            else 
+                                menu2add.MenuOrder = lastMenu + 1;
+                        }
+                        else
+                        {
+                            Menus selectedNode = menusDB.Find(i => i.idMenu == Convert.ToInt32(menuTree.SelectedNode.Name));
+
+                            if (selectedNode.idParentMenu == null)
+                            {
+                                menu2add.idParentMenu = selectedNode.idMenu;
+                                menu2add.MenuType = MENU_LEVEL1;
+                            }
+                            else
+                            {
+                                menu2add.idParentMenu = selectedNode.idMenu;
+                                menu2add.MenuType = MENU_LEVEL2;
+                            }
+                        }
+
+			menu2add.MenuName = inputName.Text;
+			menu2add.Description = inputDescription.Text;
+			ctx.Menus.InsertOnSubmit(menu2add);
+                    }
+                    catch (Exception) { }
                     break;
                 default:
                     break;
             }
 
-            // Save data here ...
-            //Menus data = (from m in ctx.Menus where m.idMenu
+            ctx.SubmitChanges();
 
-            // load data from db ...
-
-            // select the new added menus
-
-            // ... tmp
-            selectedNode = menuTree.SelectedNode;
-            menuTree.SelectedNode = selectedNode;
-            menuTree.Select();
+            loadTreeMenu();
 
             this.enableInputs(false);
         }
 
+        private void menuEdit_Click(object sender, EventArgs e)
+        {
+            activeMode = SaveMode.edit;
+
+            menuTree.SelectedNode = selectedNode;
+            menuTree.Select();
+
+            try
+            {
+                Menus selectedMenu = this.menusDB.Find(i => i.idMenu == Convert.ToInt32(menuTree.SelectedNode.Name));
+                enableInputs(true);
+                inputName.Text = selectedMenu.MenuName;
+                inputDescription.Text = selectedMenu.Description;
+                menuTree.SelectedNode = selectedNode;
+                menuTree.Select();
+            }
+            catch (NullReferenceException)
+            {
+
+            }
+        }
+
+        private void menuTree_MouseUp(object sender, MouseEventArgs e)
+        {
+            // mouse right click ...
+            if (e.Button == MouseButtons.Right)
+            {
+                Point point = new Point(e.X,e.Y);
+                menuTree.PointToClient(point); 
+                this.selectedNode = menuTree.GetNodeAt(point);
+
+                if (selectedNode != null)
+                { // hover a node
+                    if (selectedNode.Bounds.Contains(point))
+                    { 
+
+                        Menus selectedMenu = menusDB.Find(i => i.idMenu == Convert.ToInt32(selectedNode.Name));
+
+                        // remove ADD option from last order menu
+                        if (selectedMenu.MenuType.Equals(MENU_LEVEL2))
+                        { menuAdd.Enabled = false; }
+                        else
+                        { menuAdd.Enabled = true; }
+
+                        menuTree.SelectedNode = this.selectedNode;
+
+                        //  EDIT/REMOVE is always possible when a node is selected ...
+                        menuEdit.Enabled = true;
+                        menuRemove.Enabled = true;
+                        ctxMenu.Show(menuTree, point);
+                    }
+                }
+                else
+                { // hover an empty space
+                    menuEdit.Enabled = false;
+                    menuAdd.Enabled = true;
+                    menuRemove.Enabled = false;
+
+                    selectedNode = null;
+                    menuTree.SelectedNode = null;
+                    ctxMenu.Show(menuTree, point);
+                }
+            }
+        }
+
+        private void menuAdd_Click(object sender, EventArgs e)
+        {
+            activeMode = SaveMode.add;
+
+            try
+            {
+                menuTree.SelectedNode.Expand();
+                menuTree.Select();
+            }
+            catch (NullReferenceException) { }
+
+            this.clearInputs();
+            this.enableInputs(true);
+        }
+
+        private void menuRemove_Click(object sender, EventArgs e)
+        {
+            DialogResult dialog = MessageBox.Show("Delete???","attention",MessageBoxButtons.YesNo);
+            if (DialogResult.Yes == dialog)
+            {
+                DataClasses1DataContext ctx = new DataClasses1DataContext();
+                int? id = Convert.ToInt32(menuTree.SelectedNode.Name);
+                Menus menu2delete = (from m in ctx.Menus where m.idMenu == id select m).First();
+                ctx.Menus.DeleteOnSubmit(menu2delete);
+                ctx.SubmitChanges();
+                loadTreeMenu();
+            }
+        }
+
+	public void something()
+	{
+		MessageBox.Show("hello");
+	}
+
+	public static void qwerty() 
+	{
+			
+	}
+
+	private void MenuForm_KeyDown(object sender, KeyEventArgs e)
+	{
+		if (e.KeyCode == Keys.Escape)
+		{
+			Close();
+		}
+	}
+
+	private void menuTree_KeyDown(object sender, KeyEventArgs e)
+	{
+		if (e.KeyCode == Keys.Escape)
+		{
+			Close();
+		}
+	}
       
     }
 }

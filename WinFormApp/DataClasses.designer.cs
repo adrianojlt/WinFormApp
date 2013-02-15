@@ -272,7 +272,7 @@ namespace WinFormApp
 			OnCreated();
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_idMenu", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_idMenu", DbType="Int NOT NULL", IsPrimaryKey=true, IsDbGenerated=true)]
 		public int idMenu
 		{
 			get
