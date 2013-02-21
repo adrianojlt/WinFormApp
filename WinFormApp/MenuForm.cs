@@ -344,31 +344,153 @@ namespace WinFormApp
             }
         }
 
-	public void something()
-	{
-		MessageBox.Show("hello");
-	}
+		public void something()
+		{
+			MessageBox.Show("hello");
+		}
 
-	public static void qwerty() 
-	{
+		public static void qwerty() 
+		{
 			
-	}
-
-	private void MenuForm_KeyDown(object sender, KeyEventArgs e)
-	{
-		if (e.KeyCode == Keys.Escape)
-		{
-			Close();
 		}
-	}
 
-	private void menuTree_KeyDown(object sender, KeyEventArgs e)
-	{
-		if (e.KeyCode == Keys.Escape)
+		private void MenuForm_KeyDown(object sender, KeyEventArgs e)
 		{
-			Close();
+			if (e.KeyCode == Keys.Escape)
+			{
+				Close();
+			}
 		}
-	}
+
+		private void menuTree_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Escape)
+			{
+				Close();
+			}
+		}
+
+		private void switchNodes(object sender, DragEventArgs e)
+		{
+			TreeNode dragNode, destNode;
+
+			if (e.Data.GetDataPresent("System.Windows.Forms.TreeNode", false))
+			{
+				Point pt = ((TreeView)sender).PointToClient(new Point(e.X, e.Y));
+
+				dragNode = (TreeNode)e.Data.GetData("System.Windows.Forms.TreeNode");
+				Menus dragData = (Menus)dragNode.Tag;
+				int? dragNodeId = Convert.ToInt32(dragNode.Name);
+				int dragIndex = this.menusDB.FindIndex(i => i.idMenu == dragNodeId);
+
+				destNode = ((TreeView)sender).GetNodeAt(pt);
+				if (destNode == null) return; // dragged to an empty space ...
+				Menus destData = (Menus)destNode.Tag;
+				int? destNodeId = Convert.ToInt32(destNode.Name);
+				int destIndex = this.menusDB.FindIndex(i => i.idMenu == destNodeId);
+
+				// avoid these drags ...
+				if (dragData.idMenu == destData.idMenu) return;
+				if (dragData.idParentMenu == destData.idMenu) return;
+
+				DataClasses1DataContext ctx = new DataClasses1DataContext();
+				Menus dragMenu = (from m in ctx.Menus where m.idMenu == dragNodeId select m).First();
+				Menus destMenu = (from m in ctx.Menus where m.idMenu == destNodeId select m).First();
+
+				// node dragged into another of the same type
+				if (dragData.MenuType.Equals(destData.MenuType))
+				{
+					// swap order ...
+					int? tmpOrder = dragMenu.MenuOrder;
+					dragMenu.MenuOrder = destMenu.MenuOrder;
+					destMenu.MenuOrder = tmpOrder;
+
+					if (dragData.idParentMenu != destData.idParentMenu)
+					{
+						int? tmpIdParentMenu = dragMenu.idParentMenu;
+						dragMenu.idParentMenu = destMenu.idParentMenu;
+						destMenu.idParentMenu = tmpIdParentMenu;
+					}
+
+					ctx.SubmitChanges();
+
+					selectedNode = dragNode;
+
+					loadTreeMenu();
+
+					try
+					{
+						menuTree.SelectedNode = menuTree.Nodes.Find(Convert.ToString(destMenu.idParentMenu), true).First();
+						menuTree.SelectedNode.Expand();
+						menuTree.SelectedNode = menuTree.Nodes.Find(Convert.ToString(dragMenu.idParentMenu), true).First();
+						menuTree.SelectedNode.Expand();
+					}
+					catch (Exception) { }
+
+					return;
+				}
+
+				TreeNode parentDragNode;
+				Menus parentDragMenu;
+				try
+				{
+					parentDragNode = menuTree.Nodes.Find(Convert.ToString(dragMenu.idParentMenu), true).First();
+					parentDragMenu = parentDragNode.Tag as Menus;
+				}
+				catch (Exception) { return; }
+
+				// when a node is dragged to a node with the same level of the parentMenu ...
+				if (parentDragMenu.MenuType.Equals(destMenu.MenuType))
+				{
+					// get biggest menu order 
+					int? biggest = menusDB.FindAll(i => i.idParentMenu == destMenu.idMenu).Max(m => m.MenuOrder);
+
+					int? dragMenuOriginalParentID = dragMenu.idParentMenu;
+
+					if (biggest != null)
+					{
+						dragMenu.MenuOrder = biggest + 1;
+						dragMenu.idParentMenu = destMenu.idMenu;
+					}
+					else
+					{
+						dragMenu.MenuOrder = 1;
+						dragMenu.idParentMenu = destMenu.idMenu;
+					}
+
+					ctx.SubmitChanges();
+
+					loadTreeMenu();
+
+					// expand both nodes
+					try
+					{
+						this.menuTree.SelectedNode = menuTree.Nodes.Find(Convert.ToString(destMenu.idMenu), true).First();
+						this.menuTree.SelectedNode.Expand();
+						this.menuTree.SelectedNode = menuTree.Nodes.Find(Convert.ToString(dragMenuOriginalParentID), true).First();
+						this.menuTree.SelectedNode.Expand();
+					}
+					catch (Exception) { }
+
+					return;
+				}
+			}
+		}
+
+		private void menuTree_DragEnter(object sender, DragEventArgs e)
+		{
+			e.Effect = DragDropEffects.Move;
+		}
+
+		private void menuTree_DragDrop(object sender, DragEventArgs e)
+		{
+			switchNodes(sender,e);
+		}
+
+		private void menuTree_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			DoDragDrop(e.Item, DragDropEffects.Move);
+		}
       
     }
 }

@@ -45,11 +45,15 @@
 			// 
 			// menuTree
 			// 
+			this.menuTree.AllowDrop = true;
 			this.menuTree.Location = new System.Drawing.Point(13, 13);
 			this.menuTree.Name = "menuTree";
 			this.menuTree.Size = new System.Drawing.Size(192, 323);
 			this.menuTree.TabIndex = 0;
+			this.menuTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.menuTree_ItemDrag);
 			this.menuTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.menuTree_AfterSelect);
+			this.menuTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.menuTree_DragDrop);
+			this.menuTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.menuTree_DragEnter);
 			this.menuTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.menuTree_KeyDown);
 			this.menuTree.MouseUp += new System.Windows.Forms.MouseEventHandler(this.menuTree_MouseUp);
 			// 

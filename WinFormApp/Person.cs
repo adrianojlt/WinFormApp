@@ -8,8 +8,8 @@ namespace WinFormApp
     // Person class
     class Person
     {
-	public void doSomething()
-	{
-	}
+		public void doSomething()
+		{
+		}
     }
 }

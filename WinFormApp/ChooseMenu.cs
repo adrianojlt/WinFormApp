@@ -13,6 +13,11 @@ namespace WinFormApp
 	public partial class ChooseMenu : Form
 	{
 
+		public const string BUTTON_SELECT_LABEL = "Select";
+		public const string BUTTON_CANCEL_LABEL = "Cancel";
+		public const string BUTTON_SAVE_LABEL = "Save";
+		public const string BUTTON_BACK_LABEL = "Back";
+
 		private FlowLayoutPanel painel;
 
 		private Label lbl1, lbl2, lbl3;
@@ -23,10 +28,9 @@ namespace WinFormApp
 
 		private int inputBoxWidth = 200;
 
-		public const string BUTTON_SELECT_LABEL = "Select";
-		public const string BUTTON_CANCEL_LABEL = "Cancel";
-		public const string BUTTON_SAVE_LABEL = "Save";
-		public const string BUTTON_BACK_LABEL = "Back";
+		private MenuManager menuManager;
+
+        private List<Menus> menusDB;
 
 		private enum Buttons
 		{
@@ -41,10 +45,16 @@ namespace WinFormApp
 		public ChooseMenu()
 		{
 			InitializeComponent();
+			InitMyUI();
 			Init();
 		}
 
 		private void Init()
+		{
+			this.menuManager = new MenuManager();
+		}
+
+		private void InitMyUI()
 		{
 			this.painel = new FlowLayoutPanel();
 			painel.Location = treeMenus.Location;
@@ -165,6 +175,22 @@ namespace WinFormApp
 			if (e.KeyCode == Keys.Escape)
 			{
 				Close();
+			}
+		}
+
+		private void ChooseMenu_Load(object sender, EventArgs e)
+		{
+			this.menuManager.loadTreeMenu(ref this.treeMenus, ref this.menusDB);
+		}
+
+		private void txtSearch_TextChanged(object sender, EventArgs e)
+		{
+			foreach (TreeNode node in this.treeMenus.Nodes)
+			{
+				if (node.Text.ToUpper().Contains(this.txtSearch.Text.ToUpper()) && txtSearch.Text != "")
+					node.ForeColor = Color.Blue;
+				else
+					node.ForeColor = Color.Black;
 			}
 		}
 	}
